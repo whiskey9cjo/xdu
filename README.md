@@ -10,7 +10,7 @@
 
 </div>
 
-Builds Hive-partitioned Parquet indexes for instant analytics on filesystems with hundreds of millions of files.
+Builds partitioned Parquet indexes for instant analytics on filesystems with hundreds of millions of files.
 
 ## Motivation
 
@@ -27,7 +27,7 @@ Traditional tools like `du` and `find` are designed for interactive, one-off que
 
 ## Design
 
-### Hive-Partitioned Output
+### Partitioned Output
 
 The index is partitioned by top-level subdirectory. For a `/home` filesystem:
 

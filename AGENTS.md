@@ -17,8 +17,10 @@ this file.**
 **xdu** is a high-performance filesystem indexer and query suite for large-scale storage
 administration (HPC / enterprise: hundreds of millions to billions of files) where `du`(1) and
 `find`(1) are too slow for regular auditing. You point it at a directory tree; it builds a
-persistent, queryable **Hive-partitioned Parquet index** (partitioned by top-level subdirectory)
-once, then answers size/age/pattern questions instantly.
+persistent, queryable **Parquet index partitioned by top-level subdirectory** once, then answers
+size/age/pattern questions instantly. The directory names are bare, not Hive `key=value` pairs, so
+DuckDB derives no partition column from them and partition scoping comes from the glob
+(`lib::index_glob`) rather than from partition metadata.
 
 Five binaries (`Cargo.toml [[bin]]`), four user-facing plus one build helper:
 

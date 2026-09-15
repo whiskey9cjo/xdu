@@ -10,9 +10,9 @@ xdu - build a distributed file metadata index in Parquet format
 
 # DESCRIPTION
 
-*xdu* crawls a filesystem directory tree and builds a Hive-partitioned Parquet
-index containing file paths, sizes, and access times. The index is partitioned
-by top-level subdirectory, enabling per-user queries without full-index scans.
+*xdu* crawls a filesystem directory tree and builds a Parquet index containing
+file paths, sizes, and access times. The index is partitioned by top-level
+subdirectory, enabling per-user queries without full-index scans.
 
 Designed for HPC and enterprise storage environments where traditional tools
 like *du*(1) and *find*(1) are too slow for regular auditing of filesystems

@@ -1,12 +1,12 @@
 # XDU Roadmap
 
 xdu is a high-performance filesystem indexer and query suite for HPC and enterprise storage, where
-`du` and `find` collapse under billion-file trees. It builds a persistent, Hive-partitioned Parquet
-index once, then answers size/age/pattern questions instantly via DuckDB — on the command line
-(`xdu-find`), in an interactive TUI (`xdu-view`), or through guarded bulk deletion (`xdu-rm`). This
-document records the larger-scale features still intended: reaching beyond the local disk to object
-storage and change-stream ingestion, beyond `path/size/atime` to richer metadata (delivered on
-`main`), and beyond the terminal to the browser.
+`du` and `find` collapse under billion-file trees. It builds a persistent Parquet index once,
+partitioned by top-level subdirectory, then answers size/age/pattern questions instantly via
+DuckDB — on the command line (`xdu-find`), in an interactive TUI (`xdu-view`), or through guarded
+bulk deletion (`xdu-rm`). This document records the larger-scale features still intended: reaching
+beyond the local disk to object storage and change-stream ingestion, beyond `path/size/atime` to
+richer metadata (delivered on `main`), and beyond the terminal to the browser.
 
 This is a **forward-looking roadmap, not an implementation plan.** Each entry states a user problem
 and the intention behind solving it — a seed for `/xdu-feature` to shape into a `GOAL.md`, leaving
@@ -16,20 +16,20 @@ term) are **indicative** — the hard constraints are the stated dependencies.
 
 ## Delivered to date
 
-The foundation is in place and in daily use: a shared-rayon-pool concurrent crawler that walks a tree
-into a Hive-partitioned Parquet index (path, size, uid, gid, mode, atime, mtime, ctime), and the three tools that read it —
-`xdu-find` for scripted DuckDB queries, `xdu-rm` for guarded bulk deletion, and `xdu-view` for
-interactive exploration with both a list view and a Miller-columns tree view (file-type detection and
-a scrollable text preview pane). Packaging is established too: the release tarball, `install.sh`, the
-scdoc man pages, and generated shell completions (so GitHub issue #4 is effectively resolved).
-Everything below builds on that baseline.
+The foundation is in place and in daily use: a shared-rayon-pool concurrent crawler that walks a
+tree into a Parquet index partitioned by top-level subdirectory (path, size, uid, gid, mode, atime,
+mtime, ctime), and the three tools that read it — `xdu-find` for scripted DuckDB queries, `xdu-rm`
+for guarded bulk deletion, and `xdu-view` for interactive exploration with both a list view and a
+Miller-columns tree view (file-type detection and a scrollable text preview pane). Packaging is
+established too: the release tarball, `install.sh`, the scdoc man pages, and generated shell
+completions (so GitHub issue #4 is effectively resolved). Everything below builds on that baseline.
 
 ---
 
 ## S3 as an index target
 
 Indices today live on local disk, which ties them to the machine that built them. The existing
-Hive-partitioned layout (`<partition>/<chunk>.parquet`) maps directly onto object-store key prefixes,
+`<partition>/<chunk>.parquet` layout maps directly onto object-store key prefixes,
 so writing the index to S3-compatible storage is cheap — and it unlocks centralized,
 build-once/read-anywhere indices that any tool (or a future web client) can point at without copying
 files around.

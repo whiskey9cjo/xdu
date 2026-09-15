@@ -656,7 +656,9 @@ impl App {
         self.loading = true;
         let start = Instant::now();
 
-        // Use DuckDB's hive partitioning to get partition names directly from directory structure
+        // The partition name is the directory holding the chunk, recovered below from the
+        // `filename` pseudo-column. Not Hive partitioning: the layout uses bare directory names,
+        // so `hive_partitioning=true` would yield no partition column at all.
         let glob = index_glob(&self.index_path, None);
 
         // Build filter clause — exclude __root__ (its files are merged as individual entries)
