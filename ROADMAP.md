@@ -70,6 +70,75 @@ no atime — the Unix-only/no-atime assumption no longer holds for every backend
 *Horizon: long-term · Depends on: crawler-source abstraction; expect dedicated research + sub-phases · Refs: —*
 **Seed:** [`issues/s3-crawl-source.md`](issues/s3-crawl-source.md)
 
+## Index layout, declared by the operator
+
+Four entries in sequence, and the sequence is the point: each one makes the next measurable. The
+theme is that an index today is laid out exactly one way, decided by the code rather than by the
+administrator who knows what their site asks, and recorded nowhere. The end state keeps the simple
+case the default and fastest, lets an operator declare something better when they have reason to,
+writes that choice into the index so every tool reads it correctly, and — because a layout you can
+change afterwards is a decision that can be revised — makes it reversible without re-crawling.
+
+### Chunk clustering and row-group sizing
+
+Every chunk xdu writes is a single Parquet row group, so statistics eliminate whole files and
+nothing inside one; records arrive in walk order, which correlates with nothing the tool is usually
+asked about. The question this product exists to answer — what has not been touched in two years —
+therefore reads every byte of every chunk. Measured on the oldest 5% of an index: sorting the chunk
+and sizing its row groups moves 0.65 MiB where today's write moves 5.58, and 1.04 MiB against 10.07
+for the accompanying `sum(size)`. Neither half works alone — sorting without row groups buys 1.2x,
+and row groups without sorting are slower than today. First because it changes no format, no layout
+and no concurrency, and because partition granularity trades directly against row-group granularity:
+sequenced later, it would be measured against a baseline leaving 8x unclaimed.
+
+*Horizon: near-term · Depends on: — · Refs: measured during the DuckDB-native S3 read spike, 2026-09-15*
+**Seed:** [`issues/chunk-clustering-and-row-groups.md`](issues/chunk-clustering-and-row-groups.md)
+
+### A self-describing index marker
+
+The marker says what version an index is and nothing about how it is shaped, so the layout is
+knowledge held in the readers rather than a fact recorded by the writer, and an index shaped
+differently fails on a glob that matched nothing — loud, but naming the symptom. The version gate
+compounds it: refusing anything that is not exactly the current version is right for a reader
+meeting a newer index and wrong for one meeting an older one, which makes every future layout a flag
+day in both directions. Neither is a defect while there is one layout; both become defects at two.
+The work is a marker vocabulary with two classes in it — keys a reader must understand or refuse,
+and keys it may ignore — so that the first cosmetic addition does not hard-fail a reader in the
+field.
+
+*Horizon: near-term · Depends on: — · Refs: prerequisite for the two entries below*
+**Seed:** [`issues/self-describing-index-marker.md`](issues/self-describing-index-marker.md)
+
+### Opt-in deeper partitioning, declared at crawl time
+
+One partition level, fixed at the top-level subdirectory, is also the unit of scoped re-indexing —
+so on a `/scratch/<user>/<project>` tree it is coarser than the operator wants for both jobs.
+This is an opt-in second level, not a migration: measured, today's glob scoping beats a partition
+predicate for the single-partition case (1 GET against 2), because narrowing the glob narrows the
+listing while a predicate only filters the file list after it. What the opt-in buys is predicates
+the glob cannot express — 25 files read instead of 120 for an age band, 4 instead of 120 for a
+three-partition `IN`. The crawler takes only keys derivable from the path, known before any
+`stat`; keys needing file metadata would break single-writer-per-partition, and belong to the entry
+below.
+
+*Horizon: mid-term · Depends on: the self-describing marker; sequenced after clustering, whose granularity it trades against · Refs: —*
+**Seed:** [`issues/opt-in-deeper-partitioning.md`](issues/opt-in-deeper-partitioning.md)
+
+### `xdu-repack`: rewrite an index into a different layout
+
+Layout is fixed at crawl time and the only way to change it is to crawl again — hours of
+metadata-server load on exactly the filesystems where that is the scarce resource. The same gap
+makes every index-format change a flag day, since no existing index can be carried forward.
+Rewriting needs none of it: the index already holds every value a new layout could sort or partition
+on, so a repack reads Parquet and writes Parquet and never touches the filesystem it describes. It
+also absorbs the half of partitioning the crawler cannot afford, because metadata-derived keys cost
+a batch job over complete data nothing. Measured: a partitioned rewrite is one statement, and the
+work is the safety around it — a schema that survives, provenance that is not laundered, and a
+failure that leaves no readable-but-wrong index.
+
+*Horizon: mid-term · Depends on: the self-describing marker; S3 as an index target, for the remote side · Refs: —*
+**Seed:** [`issues/xdu-repack.md`](issues/xdu-repack.md)
+
 ## Bulk operations: `xdu-cp` and `xdu-mv` over a shared select-act engine
 
 First of the bulk-operations theme, whose entries land in file order: copy/move, then archives,
