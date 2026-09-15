@@ -43,13 +43,18 @@ the network solves it once for both and for everything after them.
 
 ## S3 as an index target
 
-Indices today live on local disk, which ties them to the machine that built them. The existing
-`<partition>/<chunk>.parquet` layout maps directly onto object-store key prefixes,
-so writing the index to S3-compatible storage is cheap — and it unlocks centralized,
-build-once/read-anywhere indices that any tool (or a future web client) can point at without copying
-files around.
+Indices today live on local disk, which ties them to the machine that built them. The
+`<partition>/<chunk>.parquet` layout maps directly onto object-store key prefixes, so writing the
+index to S3-compatible storage is cheap — and it unlocks centralized, build-once/read-anywhere
+indices that any tool (or a future web client) can point at without copying files around.
 
-*Horizon: mid-term · Depends on: — (write path only; layout carries over) · Refs: —*
+Reading is the half worth stating precisely, because it is the half a first cycle got wrong by
+staging the whole index to a temp directory per query. DuckDB's `httpfs` reads Parquet over HTTP
+range requests: measured against an 80.1 MiB index, `--count` moved 0.13 MiB and a `--top 10` moved
+3.94 MiB, where a staging design pays the full 80.1 MiB every time. The intention is that a query
+costs what the query asks for, not what the index weighs.
+
+*Horizon: mid-term · Depends on: shipped DuckDB extensions (above), for `httpfs` · Refs: —*
 **Seed:** [`issues/s3-index-target.md`](issues/s3-index-target.md)
 
 ## S3 as a crawl source

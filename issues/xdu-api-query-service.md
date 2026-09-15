@@ -38,10 +38,12 @@ load balancer, no coordination.
 
 DuckDB runs hardened and locked — `enable_external_access=false`, `allowed_directories`, extension
 autoload/autoinstall/community off, then `lock_configuration=true`, with the index attached *before*
-the lock. That posture is only reachable with the index on local disk, which points at object
-storage as the distribution mechanism and replicas holding local copies, rather than
-range-requesting per query. There is no statement-timeout setting, so query runtime is bounded by
-interrupting from the handler.
+the lock. Disabling external access and reading an index over the network are mutually exclusive,
+so this sketch assumes local copies and treats object storage as the distribution mechanism. That
+is a trade to decide here on evidence, not a constraint inherited from elsewhere: the service
+builds its own queries rather than accepting SQL, so how much the hardened posture is buying
+against how much a per-replica copy costs is an open question for promotion. There is no
+statement-timeout setting, so query runtime is bounded by interrupting from the handler.
 
 Aggregates report what the caller can see, matching `du` semantics, and count what was withheld.
 Reporting a true total across invisible rows would turn the service into a differencing oracle —
