@@ -26,6 +26,21 @@ completions (so GitHub issue #4 is effectively resolved). Everything below build
 
 ---
 
+## Ship DuckDB extensions instead of downloading them
+
+Any DuckDB capability xdu does not link statically arrives as a runtime download into
+`$HOME/.duckdb/extensions/`, which is a defect on the air-gapped login nodes xdu targets — the
+reason `Cargo.toml` asks for the `parquet` feature and `tests/offline_tests.rs` guards a cold
+`HOME`. Linkage does not generalize: the vendored amalgamation carries sources for `core_functions`,
+`parquet` and `json` only, so a third extension cannot be linked at all and must ship as a binary.
+Two queued entries are blocked on this same wall — S3 reads need `httpfs`, and the full-text search
+evaluation records the identical constraint in its own words. Pinning the extensions to the engine
+version, shipping them in the tarball, and failing with the path looked for rather than reaching for
+the network solves it once for both and for everything after them.
+
+*Horizon: near-term · Depends on: — · Refs: measured during the DuckDB-native S3 read spike, 2026-09-15*
+**Seed:** [`issues/duckdb-extension-distribution.md`](issues/duckdb-extension-distribution.md)
+
 ## S3 as an index target
 
 Indices today live on local disk, which ties them to the machine that built them. The existing
