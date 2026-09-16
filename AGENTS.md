@@ -314,6 +314,8 @@ build.sh install.sh Dockerfile   # packaging / ops scripts
 .agents/         # the spec-driven "software factory" (see below)
 spec/{slug}/     # committed, dated per-feature design records the factory produces (retained on merge)
 issues/{slug}.md # deferred code work, pre-shaped (status: unshaped); /xdu-feature promotes one to a GOAL
+research/        # evidence produced BEFORE a cycle exists; /xdu-plan adopts a file as
+                 # spec/{slug}/research/NN-*.md at promotion, and it is deleted from here then
 ROADMAP.md       # forward-looking feature roadmap — prose intentions that seed future /xdu-feature
 ```
 

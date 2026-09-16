@@ -89,6 +89,11 @@ not for the index.
   hold a local copy because its hardened posture disables external access. That trade belongs to
   [`xdu-api-query-service.md`](xdu-api-query-service.md) and should be decided there, on evidence,
   rather than constrained by this seed.
+- **Prior research, already done.** The spike that refutes the staging design is committed at
+  [`research/duckdb-native-s3-reads.md`](../research/duckdb-native-s3-reads.md). `/xdu-plan`
+  should adopt it as `spec/s3-index-target/research/00-*.md` rather than re-derive it. The
+  superseded first cycle is archived at tag `archive/s3-index-target-p2`, whose briefs 01, 02,
+  04 and 05 are largely transport-independent and still useful.
 - Related: [`s3-crawl-source.md`](s3-crawl-source.md) (the source direction, which reuses this
   cycle's locator parsing and credential resolution),
   [`xdu-api-query-service.md`](xdu-api-query-service.md),
