@@ -139,8 +139,8 @@ environment variables (`XDU_INDEX`, `XDU_JOBS`), documented DuckDB or `scdoc` be
 
 ### Commit messages
 
-The subject is wrapped by hand; the body is reflowed by the `commit-msg` hook. Neither number
-is a convention borrowed from elsewhere.
+The subject is wrapped by hand; the body is reflowed by the `commit-msg` hook. None of the numbers
+below is a convention borrowed from elsewhere.
 
 - **Subject: 72 characters, hard**, counting the `[category] ` prefix. `git log --oneline` spends 8
   columns on the short SHA and a space, leaving 72 of an 80-column terminal. This costs
@@ -151,6 +151,15 @@ is a convention borrowed from elsewhere.
   lines, 3% exceed 80 where 43% exceed 72, so 72 would impose a new standard rather than record the
   one in force. `git log` indents the body 4 columns, so an 80-wide body can fold in an exactly-80
   terminal; that is the accepted cost of matching the corpus.
+- **Body: 8-12 lines, and the *why* only.** The diff says what changed; the body says why, what was
+  rejected, and what it cost. The corpus runs p50 = 1 line and p90 = 12 over the 143 commits
+  preceding this rule, with two outliers at 21 and 29 — both redesigns reversing a committed
+  decision, and both reasoning rather than narration, which is the shape that earns the length. A
+  body past 12 usually means the commit wants splitting.
+- **A commit that adds prose does not restate it.** When the change is a seed, a roadmap entry or a
+  doc page, the reasoning is already in the file, and repeating it doubles the maintenance surface
+  to say nothing new. The body earns its place only with what the file cannot say: why now, why
+  here, what this replaces.
 - **Exempt from the body wrap:** a URL, a pasted error string, or a path longer than 80. Breaking
   one makes it uncopyable, so give it its own line and let it overrun.
 
