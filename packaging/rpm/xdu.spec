@@ -11,6 +11,9 @@ BuildRequires:       rust
 # invokes a tool literally named `c++`, so plain gcc is not enough.
 BuildRequires:       gcc-c++
 
+# Disable debug package generation
+%global debug_package %{nil}
+
 %description
 Extreme-scale parallel "du" command with search and TUI viewer.
 
