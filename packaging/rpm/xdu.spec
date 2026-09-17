@@ -41,6 +41,9 @@ install -D -m 0755 target/release/xdu-rm %{buildroot}%{_bindir}/xdu-rm
 %{_bindir}/%{name}-view
 
 %changelog
+* Mon Sep 17 2026 Christopher Orr <chris.orr@gmail.com> - 0.5.2-1
+- RPM spec file requires version bump to match release version.
+- Disable debug package generation.
 * Mon Sep 07 2026 Geoffrey Lentner <glentner@purdue.edu> - 0.4.2-1
 - Build from packaged sources; require gcc-c++; correct the license
 * Wed Sep  02 2026 Geoffrey Lentner <glentner@purdue.edu> - 0.4.1-1
